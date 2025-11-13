@@ -6,7 +6,6 @@ import { ClipboardDetection } from "@/hooks/useClipboardMonitor";
 import { showToast } from "@/utils/toast";
 import { router } from "expo-router";
 import { useTheme } from "@/components/ThemeProvider";
-
 interface ClipboardPromptProps {
   detection: ClipboardDetection | null;
   onDismiss: () => void;
