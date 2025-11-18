@@ -8,6 +8,7 @@ export default function ServiceLayout() {
             <Stack.Screen name="edit/[id]"/>
             <Stack.Screen name="analitics/analytics"/>
             <Stack.Screen name="exportdata/export-data"/>
+            <Stack.Screen name="feedback/feed-back"/>
         </Stack>
     );
 }

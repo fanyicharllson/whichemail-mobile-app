@@ -255,6 +255,8 @@ export default function Settings() {
 
         {/* App Info Section */}
         <View className="px-6 pb-4">
+
+          {/* Information section */}
           <Text className="text-slate-900 dark:text-slate-100 font-bold text-lg mb-3">
             Information
           </Text>
@@ -328,6 +330,27 @@ export default function Settings() {
                 color={actualTheme === "dark" ? "#94a3b8" : "#9ca3af"}
               />
             </TouchableOpacity>
+                    <TouchableOpacity
+                  className="px-4 py-4 flex-row items-center border-b border-slate-200 dark:border-slate-700"
+                  onPress={() => router.push('/service/feedback/feed-back')}
+                >
+                  <View className="bg-blue-100 dark:bg-blue-900/30 rounded-full p-2 mr-3">
+                    <Ionicons name="chatbox-ellipses" size={20} color="#3b82f6" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-slate-900 dark:text-slate-100 font-semibold">
+                      Send Feedback
+                    </Text>
+                    <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+                      Help us improve WhichEmail
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={actualTheme === "dark" ? "#94a3b8" : "#9ca3af"}
+                  />
+        </TouchableOpacity>
 
             {/* Version */}
             <View className="px-4 py-4 flex-row items-center">

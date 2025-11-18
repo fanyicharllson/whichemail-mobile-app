@@ -9,6 +9,7 @@ export const appwriteConfig = {
     databaseId: Constants.expoConfig?.extra?.APPWRITE_DATABASE_ID,
     tableUserId: Constants.expoConfig?.extra?.APPWRITE_TABLE_USER_ID,
     tableServiceId: Constants.expoConfig?.extra?.APPWRITE_TABLE_SERVICE_ID,
+    tableFeedbackId: Constants.expoConfig?.extra?.APPWRITE_TABLE_FEEDBACK_ID,
 };
 
 /*
