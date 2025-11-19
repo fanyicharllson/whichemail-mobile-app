@@ -505,13 +505,12 @@ export default function ServiceDetail() {
      {/* Floating Action Button */}
         <View className='absolute bottom-24 right-5'>
             <TouchableOpacity
-                                onPress={() => router.push('/service/add/add')}
-                                className="bg-blue-600 dark:bg-blue-700 w-16 h-16 rounded-full items-center justify-center shadow-lg active:scale-95"
-                                activeOpacity={0.9}
-                                
-                            >
-                                <Ionicons name="add" size={28} color="white"/>
-                            </TouchableOpacity>
+            onPress={() => router.push('/service/add/add')}
+            className="bg-blue-600 dark:bg-blue-700 w-16 h-16 rounded-full items-center justify-center shadow-lg active:scale-95"
+            activeOpacity={0.9}
+            >
+                 <Ionicons name="add" size={28} color="white"/>
+                 </TouchableOpacity>
         </View>
 </View>
     );

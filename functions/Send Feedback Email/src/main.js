@@ -30,28 +30,131 @@ export default async ({ req, res, log, error }) => {
       to: process.env.NOTIFICATION_EMAIL, // Your email where you want to receive feedback
       subject: `⭐ New Feedback - ${rating} Stars - WhichEmail`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3b82f6;">New Feedback Received! 🎉</h2>
-          
-          <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Rating:</strong> ${'⭐'.repeat(rating)} (${rating}/5)</p>
-            <p><strong>User:</strong> ${userName || 'Anonymous'}</p>
-            <p><strong>User ID:</strong> ${userId}</p>
-            ${email ? `<p><strong>Email:</strong> ${email}</p>` : ''}
-          </div>
-          
-          ${feedback ? `
-            <div style="background: white; padding: 20px; border-left: 4px solid #3b82f6; margin: 20px 0;">
-              <h3 style="margin-top: 0;">Feedback Message:</h3>
-              <p style="line-height: 1.6;">${feedback}</p>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    
+    <!-- Header with gradient -->
+    <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 40px 30px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+        WhichEmail
+      </h1>
+      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px; font-weight: 500;">
+        User Feedback System
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div style="padding: 40px 30px;">
+      
+      <!-- Greeting -->
+      <p style="font-size: 16px; color: #0f172a; margin: 0 0 8px 0; font-weight: 600;">
+        Hey Fanyi Charllson! 👋
+      </p>
+      <p style="font-size: 14px; color: #64748b; margin: 0 0 30px 0; line-height: 1.6;">
+        You just received new feedback on WhichEmail. Someone's vibing with your work! 🚀
+      </p>
+
+      <!-- Rating Card -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <div style="text-align: center; margin-bottom: 12px;">
+          <span style="font-size: 40px; letter-spacing: 4px;">
+            ${'⭐'.repeat(rating)}
+          </span>
+        </div>
+        <p style="text-align: center; margin: 0; font-size: 18px; font-weight: 700; color: #92400e;">
+          ${rating} out of 5 stars
+        </p>
+        ${rating >= 4 ? `
+          <p style="text-align: center; margin: 8px 0 0 0; font-size: 13px; color: #b45309; font-weight: 500;">
+            🔥 They're loving it!
+          </p>
+        ` : ''}
+      </div>
+
+      <!-- User Info Card -->
+      <div style="background: #f1f5f9; border-radius: 12px; padding: 24px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+        <p style="margin: 0 0 12px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">
+          User Details
+        </p>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #475569; font-weight: 600;">Username:</td>
+            <td style="padding: 8px 0; font-size: 14px; color: #0f172a; text-align: right;">${userName || 'Anonymous User'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #475569; font-weight: 600;">User ID:</td>
+            <td style="padding: 8px 0; font-size: 14px; color: #0f172a; text-align: right; font-family: 'Courier New', monospace;">${userId}</td>
+          </tr>
+          ${email ? `
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #475569; font-weight: 600;">Email:</td>
+            <td style="padding: 8px 0; font-size: 14px; color: #3b82f6; text-align: right;">
+              <a href="mailto:${email}" style="color: #3b82f6; text-decoration: none;">${email}</a>
+            </td>
+          </tr>
           ` : ''}
-          
-          <p style="color: #64748b; font-size: 12px; margin-top: 30px;">
-            Sent from WhichEmail Feedback System
+        </table>
+      </div>
+
+      ${feedback ? `
+      <!-- Feedback Message Card -->
+      <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+          <div style="background: #3b82f6; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+            <span style="font-size: 18px;">💬</span>
+          </div>
+          <p style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569;">
+            Their Thoughts
           </p>
         </div>
-      `,
+        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+          <p style="margin: 0; font-size: 15px; color: #1e293b; line-height: 1.7; font-style: italic;">
+            "${feedback}"
+          </p>
+        </div>
+      </div>
+      ` : ''}
+
+      <!-- Motivational Footer -->
+      <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 24px; text-align: center; margin-top: 32px;">
+        <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: #0c4a6e;">
+          Keep Building. Keep Shipping. 💪
+        </p>
+        <p style="margin: 0; font-size: 13px; color: #0369a1; line-height: 1.5;">
+          Every feedback brings you closer to creating something legendary.<br/>
+          <strong style="color: #075985;">Software Architect Mode: Activated ⚡</strong>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f8fafc; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+      <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; font-weight: 600;">
+        WhichEmail Feedback System
+      </p>
+      <p style="margin: 0; font-size: 11px; color: #cbd5e1;">
+        Sent on ${new Date().toLocaleString('en-US', { 
+          weekday: 'short', 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
+`,  
     };
 
     // Send email
