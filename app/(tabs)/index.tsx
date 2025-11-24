@@ -1,408 +1,435 @@
 import {
-    ActivityIndicator,
-    Animated,
-    Easing,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {router} from 'expo-router';
-import {Ionicons} from '@expo/vector-icons';
-import SearchBar from '@/components/common/SearchBar';
-import {useTheme} from '@/components/ThemeProvider';
-import StatCard from '@/components/cards/StatCard';
-import ServiceCard from '@/components/cards/ServiceCard';
-import EmptyState from '@/components/common/EmptyState';
-import {useServices} from '@/services/queries/serviceQueries';
-import {useUser} from '@/services/hooks/userQueries';
-import {showToast} from '@/utils/toast';
-import {useNetwork} from '@/components/NetworkProvider';
-import {CategoriesModal, PasswordsModal, UniqueEmailsModal} from "@/components/StatsModal";
-import {QuickActionsMenu} from "@/components/QuickActionsMenu";
-import AnalyticsButton from '@/components/AnalyticsButton';
-import { FavoritesSection } from '@/components/FavoriteSection';
-
+  ActivityIndicator,
+  Animated,
+  Easing,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import SearchBar from "@/components/common/SearchBar";
+import { useTheme } from "@/components/ThemeProvider";
+import StatCard from "@/components/cards/StatCard";
+import ServiceCard from "@/components/cards/ServiceCard";
+import EmptyState from "@/components/common/EmptyState";
+import { useServices } from "@/services/queries/serviceQueries";
+import { useUser } from "@/services/hooks/userQueries";
+import { showToast } from "@/utils/toast";
+import { useNetwork } from "@/components/NetworkProvider";
+import {
+  CategoriesModal,
+  PasswordsModal,
+  UniqueEmailsModal,
+} from "@/components/StatsModal";
+import { QuickActionsMenu } from "@/components/QuickActionsMenu";
+import AnalyticsButton from "@/components/AnalyticsButton";
+import { FavoritesSection } from "@/components/FavoriteSection";
+import HeroCard from "@/components/cards/heroCard";
 
 export default function Home() {
-    const {actualTheme} = useTheme();
-    const [searchQuery, setSearchQuery] = useState('');
+  const { actualTheme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState("");
 
-    const [showEmailsModal, setShowEmailsModal] = useState(false);
-    const [showPasswordsModal, setShowPasswordsModal] = useState(false);
-    const [showCategoriesModal, setShowCategoriesModal] = useState(false);
+  const [showEmailsModal, setShowEmailsModal] = useState(false);
+  const [showPasswordsModal, setShowPasswordsModal] = useState(false);
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
 
-    const {data: user, isLoading: loadingUser, error: userError} = useUser();
-    const {
-        data: services,
-        isLoading,
-        refetch,
-        isFetching,
-        error: servicesError,
-    } = useServices();
+  const { data: user, isLoading: loadingUser, error: userError } = useUser();
+  const {
+    data: services,
+    isLoading,
+    refetch,
+    isFetching,
+    error: servicesError,
+  } = useServices();
 
-    const {registerRefetch, unregisterRefetch} = useNetwork();
+  const { registerRefetch, unregisterRefetch } = useNetwork();
 
-    // Track initial load and errors
-    const isInitialLoading = isLoading || loadingUser;
-    const error = userError || servicesError;
+  // Track initial load and errors
+  const isInitialLoading = isLoading || loadingUser;
+  const error = userError || servicesError;
 
-    //ANimation
-    const aiButtonAnim = useRef(new Animated.Value(1)).current;
-    const aiButtonScale = useRef(new Animated.Value(1)).current;
-    const addButtonAnim = useRef(new Animated.Value(1)).current;
-    const addButtonScale = useRef(new Animated.Value(1)).current;
+  //ANimation
+  const aiButtonAnim = useRef(new Animated.Value(1)).current;
+  const aiButtonScale = useRef(new Animated.Value(1)).current;
+  const addButtonAnim = useRef(new Animated.Value(1)).current;
+  const addButtonScale = useRef(new Animated.Value(1)).current;
 
-    // Notify user if no services exist
-    useEffect(() => {
-        if (!isLoading && services && services.length === 0) {
-            showToast.info(
-                'No Services Yet! 😯',
-                'Tap "Add Service" to get started!'
-            );
-        }
-    }, [isLoading, services]);
+  // Notify user if no services exist
+  useEffect(() => {
+    if (!isLoading && services && services.length === 0) {
+      showToast.info(
+        "No Services Yet! 😯",
+        'Tap "Add Service" to get started!'
+      );
+    }
+  }, [isLoading, services]);
 
-    // Register refetch with global network provider so the global Retry button can trigger it
-    useEffect(() => {
-        const id = registerRefetch(refetch);
-        return () => {
-            unregisterRefetch(id);
-        };
-    }, [refetch, registerRefetch, unregisterRefetch]);
+  // Register refetch with global network provider so the global Retry button can trigger it
+  useEffect(() => {
+    const id = registerRefetch(refetch);
+    return () => {
+      unregisterRefetch(id);
+    };
+  }, [refetch, registerRefetch, unregisterRefetch]);
 
-    //Animation for floating btns
-    useEffect(() => {
-        // Start enhanced blinking animation for both buttons (opacity fade + scale pulse)
-        const startBlinking = (opacityAnim: Animated.Value, scaleAnim: Animated.Value) => {
-            Animated.loop(
-                Animated.parallel([
-                    // Opacity fade
-                    Animated.sequence([
-                        Animated.timing(opacityAnim, {
-                            toValue: 0.6,
-                            duration: 800,
-                            easing: Easing.inOut(Easing.ease),
-                            useNativeDriver: true,
-                        }),
-                        Animated.timing(opacityAnim, {
-                            toValue: 1,
-                            duration: 800,
-                            easing: Easing.inOut(Easing.ease),
-                            useNativeDriver: true,
-                        }),
-                    ]),
-                    // Scale pulse
-                    Animated.sequence([
-                        Animated.timing(scaleAnim, {
-                            toValue: 1.1,
-                            duration: 800,
-                            easing: Easing.inOut(Easing.ease),
-                            useNativeDriver: true,
-                        }),
-                        Animated.timing(scaleAnim, {
-                            toValue: 1,
-                            duration: 800,
-                            easing: Easing.inOut(Easing.ease),
-                            useNativeDriver: true,
-                        }),
-                    ]),
-                ]),
-                {iterations: -1}
-            ).start();
-        };
-        if (!isInitialLoading && !error) {
-            startBlinking(aiButtonAnim, aiButtonScale);
-            startBlinking(addButtonAnim, addButtonScale);
-        } else {
-            // Stop animations and reset to default if disabled
-            aiButtonAnim.stopAnimation();
-            aiButtonScale.stopAnimation();
-            aiButtonAnim.setValue(1);
-            aiButtonScale.setValue(1);
-            addButtonAnim.stopAnimation();
-            addButtonScale.stopAnimation();
-            addButtonAnim.setValue(1);
-            addButtonScale.setValue(1);
-        }
-    }, [isInitialLoading, error, aiButtonAnim, aiButtonScale, addButtonAnim, addButtonScale]);
+  //Animation for floating btns
+  useEffect(() => {
+    // Start enhanced blinking animation for both buttons (opacity fade + scale pulse)
+    const startBlinking = (
+      opacityAnim: Animated.Value,
+      scaleAnim: Animated.Value
+    ) => {
+      Animated.loop(
+        Animated.parallel([
+          // Opacity fade
+          Animated.sequence([
+            Animated.timing(opacityAnim, {
+              toValue: 0.6,
+              duration: 800,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnim, {
+              toValue: 1,
+              duration: 800,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+          ]),
+          // Scale pulse
+          Animated.sequence([
+            Animated.timing(scaleAnim, {
+              toValue: 1.1,
+              duration: 800,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+              toValue: 1,
+              duration: 800,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+          ]),
+        ]),
+        { iterations: -1 }
+      ).start();
+    };
+    if (!isInitialLoading && !error) {
+      startBlinking(aiButtonAnim, aiButtonScale);
+      startBlinking(addButtonAnim, addButtonScale);
+    } else {
+      // Stop animations and reset to default if disabled
+      aiButtonAnim.stopAnimation();
+      aiButtonScale.stopAnimation();
+      aiButtonAnim.setValue(1);
+      aiButtonScale.setValue(1);
+      addButtonAnim.stopAnimation();
+      addButtonScale.stopAnimation();
+      addButtonAnim.setValue(1);
+      addButtonScale.setValue(1);
+    }
+  }, [
+    isInitialLoading,
+    error,
+    aiButtonAnim,
+    aiButtonScale,
+    addButtonAnim,
+    addButtonScale,
+  ]);
 
-    // ✅ Pre-calculate stats safely
-    const uniqueEmails = new Set(services?.map((s) => s.email) ?? []).size;
-    const servicesWithPassword =
-        services?.filter((s) => s.hasPassword).length ?? 0;
+  // ✅ Pre-calculate stats safely
+  const uniqueEmails = new Set(services?.map((s) => s.email) ?? []).size;
+  const servicesWithPassword =
+    services?.filter((s) => s.hasPassword).length ?? 0;
 
-    const filteredServices =
-        services?.filter(
-            (service) =>
-                service.serviceName
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase()) ||
-                service.email.toLowerCase().includes(searchQuery.toLowerCase())
-        ) ?? [];
+  const filteredServices =
+    services?.filter(
+      (service) =>
+        service.serviceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.email.toLowerCase().includes(searchQuery.toLowerCase())
+    ) ?? [];
 
-    return (
-        <View className="flex-1 bg-slate-50 dark:bg-slate-900">
-            <StatusBar
-                barStyle={actualTheme === 'dark' ? 'light-content' : 'dark-content'}
-                backgroundColor={actualTheme === 'dark' ? '#0f172a' : '#ffffff'}
-                
+  // Calculate stats
+  const totalServices = services?.length ?? 0;
+
+  return (
+    <View className="flex-1 bg-slate-50 dark:bg-slate-900">
+      <StatusBar
+        barStyle={actualTheme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={actualTheme === "dark" ? "#0f172a" : "#ffffff"}
+      />
+
+      {/* Header */}
+      <View className="bg-white dark:bg-slate-800 pt-14 pb-6 px-6 border-b border-slate-200 dark:border-slate-700">
+        <View className="flex-row items-center justify-between mb-6">
+          <View>
+            <Text className="text-slate-500 dark:text-slate-200 text-sm">
+              Welcome back, {user?.name?.split(" ")[0] || ""}! 🥰❤
+            </Text>
+            <Text className="text-slate-900 dark:text-slate-100 font-bold text-2xl">
+              WhichEmail 🚀
+            </Text>
+          </View>
+          {/* Right side buttons */}
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/settings")}
+              className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-full items-center justify-center"
+              disabled={isInitialLoading}
+            >
+              <Ionicons
+                name="settings-outline"
+                size={22}
+                color={actualTheme === "dark" ? "#cbd5e1" : "#374151"}
+              />
+            </TouchableOpacity>
+
+            {/* Quick Actions Menu */}
+            <QuickActionsMenu
+              userName={user?.name}
+              totalServices={services?.length || 0}
+              uniqueEmails={uniqueEmails}
             />
+          </View>
+        </View>
 
-            {/* Header */}
-            <View
-                className="bg-white dark:bg-slate-800 pt-14 pb-6 px-6 border-b border-slate-200 dark:border-slate-700">
-                <View className="flex-row items-center justify-between mb-6">
-                    <View>
-                        <Text className="text-slate-500 dark:text-slate-200 text-sm">
-                            Welcome back, {user?.name?.split(' ')[0] || ''}! 🥰❤
-                        </Text>
-                        <Text className="text-slate-900 dark:text-slate-100 font-bold text-2xl">
-                            WhichEmail 🚀
-                        </Text>
-                    </View>
-                    {/* Right side buttons */}
-                    <View className="flex-row items-center gap-2">
-                        <TouchableOpacity
-                            onPress={() => router.push('/(tabs)/settings')}
-                            className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-full items-center justify-center"
-                            disabled={isInitialLoading}
-                        >
-                            <Ionicons
-                                name="settings-outline"
-                                size={22}
-                                color={actualTheme === 'dark' ? '#cbd5e1' : '#374151'}
-                            />
-                        </TouchableOpacity>
+        {/* Search Bar */}
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      </View>
 
-                        {/* Quick Actions Menu */}
-                        <QuickActionsMenu
-                            userName={user?.name}
-                            totalServices={services?.length || 0}
-                            uniqueEmails={uniqueEmails}
-                        />
-                    </View>
-                </View>
+      {/* Recent service and stats card  */}
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={!isInitialLoading}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching && !isInitialLoading}
+            onRefresh={refetch}
+            tintColor="#3b82f6"
+          />
+        }
+      >
+        <View className="px-6 py-6">
+          <HeroCard
+            userName={user?.name?.split(" ")[0] || "User"}
+            totalServices={totalServices}
+            onQuickAction={() => router.push("/service/add/add")}
+            services={services}
+            onAIChat={() => router.push("/ai-assistant")}
+            onServiceOfDay={(service) =>
+              router.push(`/service/detail/${service.id}`)
+            }
+          />
 
-                {/* Search Bar */}
-                <SearchBar value={searchQuery} onChangeText={setSearchQuery}/>
+          <Text className="text-slate-900 dark:text-slate-100 font-bold text-lg mb-4">
+            Service Overview
+          </Text>
+
+          {/* Row 1 */}
+          <View className="flex-row gap-3 mb-3">
+            <StatCard
+              title="Total Services"
+              value={services?.length || 0}
+              icon="apps"
+              color="#3b82f6"
+              bgColor="#dbeafe"
+              gradientColors={["#3b82f6", "#60a5fa"]}
+              onPress={() => router.push("/(tabs)/services")}
+              subtitle="Tap to view all"
+            />
+            <StatCard
+              title="Unique Emails"
+              value={uniqueEmails}
+              icon="mail"
+              color="#10b981"
+              bgColor="#d1fae5"
+              gradientColors={["#10b981", "#34d399"]}
+              onPress={() => setShowEmailsModal(true)}
+              subtitle="Tap to explore"
+            />
+          </View>
+
+          {/* Row 2 */}
+          <View className="flex-row gap-3">
+            <StatCard
+              title="With Passwords"
+              value={servicesWithPassword}
+              icon="lock-closed"
+              color="#f59e0b"
+              bgColor="#fef3c7"
+              gradientColors={["#f59e0b", "#fbbf24"]}
+              onPress={() => setShowPasswordsModal(true)}
+              subtitle="Tap for details"
+            />
+            <StatCard
+              title="Categories"
+              value={8}
+              icon="folder"
+              color="#8b5cf6"
+              bgColor="#ede9fe"
+              gradientColors={["#8b5cf6", "#a78bfa"]}
+              onPress={() => setShowCategoriesModal(true)}
+              subtitle="Auto-managed"
+            />
+          </View>
+        </View>
+
+        {/* Analytics Button  */}
+        <View className="px-6 pb-6">
+          <AnalyticsButton />
+        </View>
+
+        {/* Favorite Services Section */}
+        {!isLoading && <FavoritesSection services={services || []} />}
+
+        {/* Recent Services */}
+        <View className="px-6 pb-6">
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-slate-900 dark:text-slate-100 font-bold text-lg">
+              {searchQuery ? "Search Results" : "Recent Services"}
+            </Text>
+            {!searchQuery && services && services.length > 0 && (
+              <TouchableOpacity onPress={() => router.push("/(tabs)/services")}>
+                <Text className="text-blue-600 font-semibold">See All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Services List */}
+          {filteredServices.length > 0 ? (
+            filteredServices
+              .slice(0, 5)
+              .map((service) => (
+                <ServiceCard key={service.id} service={service} />
+              ))
+          ) : searchQuery ? (
+            <EmptyState
+              icon="search"
+              title="No Results"
+              message={`No services found for "${searchQuery}"`}
+            />
+          ) : (
+            <EmptyState
+              icon="mail-outline"
+              title="No Services Yet"
+              message="Start tracking your emails by adding your first service"
+              actionLabel="Add Service"
+              onAction={() => router.push("/service/add/add")}
+            />
+          )}
+        </View>
+      </ScrollView>
+
+      {/* ✅ Floating AI and Add Buttons (stacked vertically with enhanced blinking animation) */}
+      <Animated.View
+        style={{
+          opacity: aiButtonAnim,
+          transform: [{ scale: aiButtonScale }],
+          position: "absolute",
+          bottom: 96, // Stacked above Add button
+          right: 24,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/ai-assistant")}
+          className="bg-blue-600 dark:bg-blue-700 w-16 h-16 rounded-full items-center justify-center shadow-lg active:scale-95"
+          activeOpacity={0.9}
+          disabled={isInitialLoading || !!error}
+        >
+          <Ionicons name="sparkles" size={28} color="white" />
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View
+        style={{
+          opacity: addButtonAnim,
+          transform: [{ scale: addButtonScale }],
+          position: "absolute",
+          bottom: 24,
+          right: 24,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => router.push("/service/add/add")}
+          className="bg-blue-600 dark:bg-blue-700 w-16 h-16 rounded-full items-center justify-center shadow-lg active:scale-95"
+          activeOpacity={0.9}
+          disabled={isInitialLoading || !!error}
+        >
+          <Ionicons name="add" size={28} color="white" />
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* ✨ Modern Loading Overlay */}
+      <Modal
+        visible={isInitialLoading}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center">
+          <View className="bg-white dark:bg-slate-800 rounded-3xl px-8 py-10 mx-6 items-center shadow-2xl">
+            {/* Animated Spinner */}
+            <View className="mb-6">
+              <ActivityIndicator size="large" color="#3b82f6" />
             </View>
 
-                {/* Recent service and stats card  */}
-            <ScrollView
-                className="flex-1"
-                showsVerticalScrollIndicator={false}
-                scrollEnabled={!isInitialLoading}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isFetching && !isInitialLoading}
-                        onRefresh={refetch}
-                        tintColor="#3b82f6"
-                    />
-                }
-            >
-                <View className="px-6 py-6">
-                    <Text className="text-slate-900 dark:text-slate-100 font-bold text-lg mb-4">
-                       Service Overview
-                    </Text>
+            {/* Icon */}
+            <View className="bg-blue-100 w-16 h-16 rounded-full items-center justify-center mb-4">
+              <Ionicons name="sync" size={32} color="#3b82f6" />
+            </View>
 
-                    {/* Row 1 */}
-                    <View className="flex-row gap-3 mb-3">
-                        <StatCard
-                            title="Total Services"
-                            value={services?.length || 0}
-                            icon="apps"
-                            color="#3b82f6"
-                            bgColor="#dbeafe"
-                            gradientColors={['#3b82f6', '#60a5fa']}
-                            onPress={() => router.push('/(tabs)/services')}
-                            subtitle="Tap to view all"
-                        />
-                        <StatCard
-                            title="Unique Emails"
-                            value={uniqueEmails}
-                            icon="mail"
-                            color="#10b981"
-                            bgColor="#d1fae5"
-                            gradientColors={['#10b981', '#34d399']}
-                            onPress={() => setShowEmailsModal(true)}
-                            subtitle="Tap to explore"
-                        />
-                    </View>
+            {/* Loading Text */}
+            <Text className="text-gray-900 dark:text-slate-100 font-bold text-xl mb-2">
+              Loading Dashboard
+            </Text>
+            <Text className="text-gray-500 dark:text-slate-100 text-center text-sm">
+              Setting up your workspace...{"\n"}This will only take a moment
+            </Text>
 
-                    {/* Row 2 */}
-                    <View className="flex-row gap-3">
-                        <StatCard
-                            title="With Passwords"
-                            value={servicesWithPassword}
-                            icon="lock-closed"
-                            color="#f59e0b"
-                            bgColor="#fef3c7"
-                            gradientColors={['#f59e0b', '#fbbf24']}
-                            onPress={() => setShowPasswordsModal(true)}
-                            subtitle="Tap for details"
-                        />
-                        <StatCard
-                            title="Categories"
-                            value={8}
-                            icon="folder"
-                            color="#8b5cf6"
-                            bgColor="#ede9fe"
-                            gradientColors={['#8b5cf6', '#a78bfa']}
-                            onPress={() => setShowCategoriesModal(true)}
-                            subtitle="Auto-managed"
-                        />
-                    </View>
-                </View>
-
-                {/* Analytics Button  */}
-                <View className='px-6 pb-6'>
-                     <AnalyticsButton/>
-                </View>
-
-                {/* Favorite Services Section */}
-                {!isLoading && <FavoritesSection services={services || []} />}
-
-
-                {/* Recent Services */}
-                <View className="px-6 pb-6">
-                    <View className="flex-row items-center justify-between mb-4">
-                        <Text className="text-slate-900 dark:text-slate-100 font-bold text-lg">
-                            {searchQuery ? 'Search Results' : 'Recent Services'}
-                        </Text>
-                        {!searchQuery && services && services.length > 0 && (
-                            <TouchableOpacity onPress={() => router.push('/(tabs)/services')}>
-                                <Text className="text-blue-600 font-semibold">See All</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    {/* Services List */}
-                    {filteredServices.length > 0 ? (
-                        filteredServices.slice(0, 5).map((service) => (
-                            <ServiceCard key={service.id} service={service}/>
-                        ))
-                    ) : searchQuery ? (
-                        <EmptyState
-                            icon="search"
-                            title="No Results"
-                            message={`No services found for "${searchQuery}"`}
-                        />
-                    ) : (
-                        <EmptyState
-                            icon="mail-outline"
-                            title="No Services Yet"
-                            message="Start tracking your emails by adding your first service"
-                            actionLabel="Add Service"
-                            onAction={() => router.push('/service/add/add')}
-                        />
-                    )}
-                </View>
-            </ScrollView>
-
-            {/* ✅ Floating AI and Add Buttons (stacked vertically with enhanced blinking animation) */}
-            <Animated.View
-                style={{
-                    opacity: aiButtonAnim,
-                    transform: [{scale: aiButtonScale}],
-                    position: 'absolute',
-                    bottom: 96, // Stacked above Add button
-                    right: 24,
-                }}
-            >
-                <TouchableOpacity
-                    onPress={() => router.push('/(tabs)/ai-assistant')}
-                    className="bg-blue-600 dark:bg-blue-700 w-16 h-16 rounded-full items-center justify-center shadow-lg active:scale-95"
-                    activeOpacity={0.9}
-                    disabled={isInitialLoading || !!error}
-                >
-                    <Ionicons name="sparkles" size={28} color="white"/>
-                </TouchableOpacity>
-            </Animated.View>
-            <Animated.View
-                style={{
-                    opacity: addButtonAnim,
-                    transform: [{scale: addButtonScale}],
-                    position: 'absolute',
-                    bottom: 24,
-                    right: 24,
-                }}
-            >
-                <TouchableOpacity
-                    onPress={() => router.push('/service/add/add')}
-                    className="bg-blue-600 dark:bg-blue-700 w-16 h-16 rounded-full items-center justify-center shadow-lg active:scale-95"
-                    activeOpacity={0.9}
-                    disabled={isInitialLoading || !!error}
-                >
-                    <Ionicons name="add" size={28} color="white"/>
-                </TouchableOpacity>
-            </Animated.View>
-
-
-            {/* ✨ Modern Loading Overlay */}
-            <Modal
-                visible={isInitialLoading}
-                transparent={true}
-                animationType="fade"
-                statusBarTranslucent={true}
-            >
-                <View className="flex-1 bg-black/50 items-center justify-center">
-                    <View className="bg-white dark:bg-slate-800 rounded-3xl px-8 py-10 mx-6 items-center shadow-2xl">
-                        {/* Animated Spinner */}
-                        <View className="mb-6">
-                            <ActivityIndicator size="large" color="#3b82f6"/>
-                        </View>
-
-                        {/* Icon */}
-                        <View className="bg-blue-100 w-16 h-16 rounded-full items-center justify-center mb-4">
-                            <Ionicons name="sync" size={32} color="#3b82f6"/>
-                        </View>
-
-                        {/* Loading Text */}
-                        <Text className="text-gray-900 dark:text-slate-100 font-bold text-xl mb-2">
-                            Loading Dashboard
-                        </Text>
-                        <Text className="text-gray-500 dark:text-slate-100 text-center text-sm">
-                            Setting up your workspace...{'\n'}This will only take a moment
-                        </Text>
-
-                        {/* Progress Dots */}
-                        <View className="flex-row gap-2 mt-6">
-                            <View className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"/>
-                            <View className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"
-                                  style={{animationDelay: '0.2s'}}/>
-                            <View className="w-2 h-2 bg-blue-300 rounded-full animate-pulse"
-                                  style={{animationDelay: '0.4s'}}/>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            
-            {/* Global network modal is provided by NetworkProvider */}
-
-            {/*Modal that will appear when the stat icon is clicked*/}
-            <UniqueEmailsModal
-                visible={showEmailsModal}
-                onClose={() => setShowEmailsModal(false)}
-                services={services || []}
-            />
-
-            <PasswordsModal
-                visible={showPasswordsModal}
-                onClose={() => setShowPasswordsModal(false)}
-                services={services || []}
-            />
-
-            <CategoriesModal
-                visible={showCategoriesModal}
-                onClose={() => setShowCategoriesModal(false)}
-                services={services || []}
-            />
+            {/* Progress Dots */}
+            <View className="flex-row gap-2 mt-6">
+              <View className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+              <View
+                className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"
+                style={{ animationDelay: "0.2s" }}
+              />
+              <View
+                className="w-2 h-2 bg-blue-300 rounded-full animate-pulse"
+                style={{ animationDelay: "0.4s" }}
+              />
+            </View>
+          </View>
         </View>
-    );
+      </Modal>
+
+      {/* Global network modal is provided by NetworkProvider */}
+
+      {/*Modal that will appear when the stat icon is clicked*/}
+      <UniqueEmailsModal
+        visible={showEmailsModal}
+        onClose={() => setShowEmailsModal(false)}
+        services={services || []}
+      />
+
+      <PasswordsModal
+        visible={showPasswordsModal}
+        onClose={() => setShowPasswordsModal(false)}
+        services={services || []}
+      />
+
+      <CategoriesModal
+        visible={showCategoriesModal}
+        onClose={() => setShowCategoriesModal(false)}
+        services={services || []}
+      />
+    </View>
+  );
 }

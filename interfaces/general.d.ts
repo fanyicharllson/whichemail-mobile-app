@@ -16,3 +16,12 @@ interface SmartSearchParams {
     query: string;
     services: Service[];
 }
+
+interface HeroCardProps {
+  userName?: string;
+  totalServices: number;
+  services?: Service[];
+  onQuickAction?: () => void;
+  onAIChat?: () => void;
+  onServiceOfDay?: (service: Service) => void;
+}

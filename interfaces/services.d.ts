@@ -9,4 +9,6 @@
     isFavorite: boolean;
     createdAt: string;
     updatedAt: string;
+    icon?: keyof typeof Ionicons.glyphMap;
+
 }
