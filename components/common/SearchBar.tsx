@@ -1,21 +1,24 @@
 import {TextInput, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
-import {useState} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {useTheme} from '@/components/ThemeProvider';
-
-interface SearchBarProps {
-    value: string;
-    onChangeText: (text: string) => void;
-    placeholder?: string;
-}
 
 export default function SearchBar({
                                       value,
                                       onChangeText,
-                                      placeholder = 'Search services or emails...'
+                                      placeholder = 'Search services or emails...',
+                                      autoFocus = false,
                                   }: SearchBarProps) {
     const [isFocused, setIsFocused] = useState(false);
     const { actualTheme } = useTheme();
+    const inputRef = useRef<TextInput | null>(null);
+
+    useEffect(() => {
+        if (autoFocus) {
+            // small delay to ensure rendering/navigation completed
+            setTimeout(() => inputRef.current?.focus(), 50);
+        }
+    }, [autoFocus]);
 
     return (
         <View
@@ -35,6 +38,7 @@ export default function SearchBar({
                 placeholderTextColor={actualTheme === 'dark' ? '#94a3b8' : '#9ca3af'}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
+                ref={inputRef}
                 className="flex-1 py-3 px-3 text-slate-900 dark:text-slate-100 text-base"
             />
             {value.length > 0 && (

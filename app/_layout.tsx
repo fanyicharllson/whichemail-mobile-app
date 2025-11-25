@@ -2,6 +2,7 @@
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
+import { View, Text, ActivityIndicator } from 'react-native';
 import "./globals.css";
 import Toast from "react-native-toast-message";
 import { getToastConfig } from "@/utils/toastConfig";
@@ -72,6 +73,7 @@ function App({
 
         {/* Network overlay */}
         <NetworkOverlay />
+        <SyncIndicator />
       </NetworkProvider>
     </ClipboardMonitorProvider>
     </ErrorBoundary>
@@ -80,7 +82,7 @@ function App({
 
 // Small overlay component that consumes network context to render global modal
 function NetworkOverlay() {
-  const {isConnected, error, triggerRefetch} = useNetwork();
+  const {isConnected, error, triggerRefetch, isSyncing} = useNetwork();
 
   return (
     <NetworkErrorModal
@@ -90,6 +92,21 @@ function NetworkOverlay() {
         await triggerRefetch();
       }}
     />
+  );
+}
+
+// Small global sync indicator shown on top-right when any global sync is running
+function SyncIndicator() {
+  const { isSyncing } = useNetwork();
+  if (!isSyncing) return null;
+
+  return (
+    <View style={{ position: 'absolute', top: 12, right: 12, zIndex: 60 }}>
+      <View className="flex-row items-center bg-white dark:bg-slate-800 rounded-full px-3 py-2 shadow-md">
+        <ActivityIndicator size="small" color="#ef4444" style={{ marginRight: 8 }} />
+        <Text className="text-slate-900 dark:text-slate-100 text-sm">Syncing your data…</Text>
+      </View>
+    </View>
   );
 }
 

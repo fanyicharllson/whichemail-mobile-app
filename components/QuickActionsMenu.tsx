@@ -1,15 +1,10 @@
 import React, {useState} from 'react';
-import {Modal, Share, Text, TouchableOpacity, View} from 'react-native';
+import {Modal, Share, Text, TouchableOpacity, View, ActivityIndicator} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from './ThemeProvider';
 import {router} from 'expo-router';
 import {showToast} from '@/utils/toast';
-
-interface QuickActionsMenuProps {
-    userName?: string;
-    totalServices: number;
-    uniqueEmails: number;
-}
+import { useNetwork } from '@/components/NetworkProvider';
 
 export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                                                                       userName,
@@ -51,8 +46,8 @@ export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
             bgColor: isDark ? '#06402820' : '#d1fae5',
             action: () => {
                 setMenuVisible(false);
-                router.push('/(tabs)/services');
-                //  could add auto-focus to search input here
+                // Navigate to services and request the search input to autofocus using query param
+                router.push('/(tabs)/services?focus=1');
             },
         },
         {
@@ -64,17 +59,6 @@ export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
             action: () => {
                 setMenuVisible(false);
                 router.push('/(tabs)/ai-assistant');
-            },
-        },
-        {
-            icon: 'stats-chart',
-            label: 'View Stats',
-            subtitle: 'Your insights',
-            color: '#f59e0b',
-            bgColor: isDark ? '#78350f20' : '#fef3c7',
-            action: () => {
-                setMenuVisible(false);
-                showStatsToast();
             },
         },
         {
@@ -101,14 +85,7 @@ export const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
         },
 
     ];
-
-    const showStatsToast = () => {
-        showToast.success(
-            'Quick Stats 📊',
-            `${totalServices} services • ${uniqueEmails} emails`
-        );
-    };
-
+   
     const shareApp = async () => {
         try {
             const ANDROID_DOWNLOAD_LINK = 'https://expo.dev/artifacts/eas/qBD26CXCdUpu5a69P9Hxe3.apk';
@@ -137,9 +114,21 @@ Built with ❤️ by ${userName || 'Fanyi Charllson'} 😎`;
     };
 
 
-    const syncData = () => {
-        showToast.success('Synced! ✓', 'Your data is up to date');
-        // Add actual  logic here if needed
+    const { triggerRefetch, isSyncing } = useNetwork();
+
+    const syncData = async () => {
+        if (isSyncing) {
+            showToast.info('Syncing already in progress');
+            return;
+        }
+
+        try {
+            await triggerRefetch();
+            showToast.success('Synced! ✓', 'Your data is up to date');
+        } catch (error) {
+            console.error('Sync failed', error);
+            showToast.error('Sync failed', (error as Error)?.message || 'Please try again');
+        }
     };
 
     return (
@@ -185,33 +174,52 @@ Built with ❤️ by ${userName || 'Fanyi Charllson'} 😎`;
 
                             {/* Menu Items */}
                             <View className="py-2">
-                                {menuItems.map((item, index) => (
-                                    <TouchableOpacity
-                                        key={index}
-                                        onPress={item.action}
-                                        className="px-4 py-3 flex-row items-center active:bg-slate-50 dark:active:bg-slate-700/50"
-                                    >
-                                        <View
-                                            className="w-9 h-9 rounded-xl items-center justify-center mr-3"
-                                            style={{backgroundColor: item.bgColor}}
+                                {menuItems.map((item, index) => {
+                                    const isSyncItem = item.label === 'Sync Data';
+                                    const disabled = isSyncItem && isSyncing;
+
+                                    return (
+                                        <TouchableOpacity
+                                            key={index}
+                                            onPress={() => {
+                                                if (disabled) {
+                                                    showToast.info('Sync already in progress');
+                                                    return;
+                                                }
+                                                item.action();
+                                            }}
+                                            className={`px-4 py-3 flex-row items-center ${disabled ? 'opacity-50' : ''} active:bg-slate-50 dark:active:bg-slate-700/50`}
                                         >
-                                            <Ionicons name={item.icon as any} size={18} color={item.color}/>
-                                        </View>
-                                        <View className="flex-1">
-                                            <Text className="text-slate-900 dark:text-slate-100 font-semibold text-sm">
-                                                {item.label}
-                                            </Text>
-                                            <Text className="text-slate-500 dark:text-slate-400 text-xs">
-                                                {item.subtitle}
-                                            </Text>
-                                        </View>
-                                        <Ionicons
-                                            name="chevron-forward"
-                                            size={16}
-                                            color={isDark ? '#64748b' : '#94a3b8'}
-                                        />
-                                    </TouchableOpacity>
-                                ))}
+                                            <View
+                                                className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+                                                style={{backgroundColor: item.bgColor}}
+                                            >
+                                                <Ionicons name={item.icon as any} size={18} color={item.color}/>
+                                            </View>
+                                            <View className="flex-1 flex-row items-center justify-between">
+                                                <View>
+                                                    <Text className="text-slate-900 dark:text-slate-100 font-semibold text-sm">
+                                                        {item.label}
+                                                    </Text>
+                                                    <Text className="text-slate-500 dark:text-slate-400 text-xs">
+                                                        {item.subtitle}
+                                                    </Text>
+                                                </View>
+
+                                                <View className="flex-row items-center">
+                                                    {isSyncItem && isSyncing && (
+                                                        <ActivityIndicator size="small" color="#ec4899" style={{marginRight: 8}} />
+                                                    )}
+                                                    <Ionicons
+                                                        name="chevron-forward"
+                                                        size={16}
+                                                        color={isDark ? '#64748b' : '#94a3b8'}
+                                                    />
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+                                    );
+                                })}
                             </View>
 
                             {/* Footer */}

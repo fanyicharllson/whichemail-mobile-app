@@ -173,7 +173,7 @@ export default function Welcome() {
                             Fanyi Charllson
                         </Text>
                         <Text className="text-blue-50 dark:text-slate-200 text-sm leading-6 mb-3">
-                            Born from a real struggle: forgetting which email I used everywhere. 
+                            Born from a real struggle: Forgetting which email I used everywhere. 
                             Now it&apos;s your superpower! 🚀
                         </Text>
                         <View className="flex-row items-center gap-2">

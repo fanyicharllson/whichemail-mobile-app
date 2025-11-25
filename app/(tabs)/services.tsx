@@ -6,7 +6,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/components/ThemeProvider";
@@ -22,6 +22,8 @@ export default function Services() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: services, isLoading, refetch, isFetching } = useServices();
+  const { focus } = useLocalSearchParams();
+  const autoFocus = focus === '1';
 
   // Filter services
   const filteredServices = services?.filter((service) => {
@@ -70,7 +72,7 @@ export default function Services() {
         </View>
 
         {/* Search */}
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} autoFocus={autoFocus} />
 
         {/* Category Filter */}
         <ScrollView

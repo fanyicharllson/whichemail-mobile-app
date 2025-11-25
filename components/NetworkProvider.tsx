@@ -7,6 +7,7 @@ type NetworkContextType = {
   isConnected: boolean | null;
   isInternetReachable: boolean | null;
   error: Error | null;
+  isSyncing: boolean;
   registerRefetch: (fn: RefetchFn) => string;
   unregisterRefetch: (id: string) => void;
   triggerRefetch: () => Promise<void>;
@@ -23,6 +24,7 @@ export const useNetwork = () => {
 export const NetworkProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
   const [state, setState] = useState<NetInfoState | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const refetchMap = useRef(new Map<string, RefetchFn>());
 
@@ -54,15 +56,21 @@ export const NetworkProvider: React.FC<{children: React.ReactNode}> = ({children
 
   const triggerRefetch = async () => {
     const fns = Array.from(refetchMap.current.values());
-    await Promise.all(
-      fns.map(async (fn) => {
-        try {
-          await fn();
-        } catch {
-          // ignore per-callback error
-        }
-      })
-    );
+    setIsSyncing(true);
+    try {
+      await Promise.all(
+        fns.map(async (fn) => {
+          try {
+            await fn();
+          } catch {
+            // ignore per-callback error
+          }
+        })
+      );
+    } finally {
+      // small delay to allow UI to show spinner briefly even if fast
+      setTimeout(() => setIsSyncing(false), 150);
+    }
   };
 
   return (
@@ -71,6 +79,7 @@ export const NetworkProvider: React.FC<{children: React.ReactNode}> = ({children
         isConnected: state?.isConnected ?? null,
         isInternetReachable: state?.isInternetReachable ?? null,
         error,
+        isSyncing,
         registerRefetch,
         unregisterRefetch,
         triggerRefetch,

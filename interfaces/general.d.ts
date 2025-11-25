@@ -25,3 +25,14 @@ interface HeroCardProps {
   onAIChat?: () => void;
   onServiceOfDay?: (service: Service) => void;
 }
+interface QuickActionsMenuProps {
+    userName?: string;
+    totalServices: number;
+    uniqueEmails: number;
+}
+interface SearchBarProps {
+    value: string;
+    onChangeText: (text: string) => void;
+    placeholder?: string;
+    autoFocus?: boolean;
+}

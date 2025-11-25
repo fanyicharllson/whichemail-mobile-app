@@ -64,7 +64,7 @@ export default function NetworkErrorModal({
         position: "absolute",
         left: 16,
         right: 16,
-        bottom: 6 + insets.bottom,
+        bottom: 20 + insets.bottom,
         zIndex: 50,
       }}
       pointerEvents="box-none"
