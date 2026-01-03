@@ -1,49 +1,39 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Dependencies - DO NOT SUBMIT node_modules
+WhichEmail/node_modules/
 
-# dependencies
-node_modules/
+# Environment files with secrets
+WhichEmail/.env
+WhichEmail/.env.local
+WhichEmail/.env*.local
+WhichEmail/API_KEYS_FOR_SUBMISSION.txt
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
+# Build outputs
+WhichEmail/dist/
+WhichEmail/web-build/
+WhichEmail/.expo/
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# Native builds (will be regenerated)
+WhichEmail/android/.gradle/
+WhichEmail/android/.kotlin/
+WhichEmail/android/app/build/
+WhichEmail/android/build/
+WhichEmail/ios/
 
-# Metro
-.metro-health-check*
+# IDE
+.vscode/
+.idea/
 
-# debug
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
-.DS_Store
-*.pem
-
-note.txt
-
-# local env files
-.env*.local
-.env
-whatsapp.ts
-
-# typescript
-*.tsbuildinfo
-
-app-example
-
-# generated native folders
-/ios
-/android
-
-.env.local
+# Temporary files
+*.tmp
+*.temp
+WhichEmail/note.txt
