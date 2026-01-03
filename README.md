@@ -14,6 +14,7 @@
 | Field | Details |
 |-------|---------|
 | **Student Name** | Fanyi Charllson Fanyi |
+| **Matricule** | ICTU20233841 |
 | **Course Code** | CS 3410 |
 | **Course Title** | Introduction to Mobile Application Development |
 | **Lecturer** | Dr. Fotsing Kuetche |
